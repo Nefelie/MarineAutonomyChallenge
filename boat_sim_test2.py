@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt
 from ShipAnim import find_limits, set_plot
 import socket
 import pickle
+import re
 
 def compare_points(x, y):
     if x[0] == y[0] and x[1] == y[1]:
@@ -96,7 +97,7 @@ class Simulator:
         waypoints_deg = []
         for track in self.track_list:
             for waypoint_dmm in track:
-                waypoints_deg.append([DMM_to_DEG(waypoint_dmm)[0], waypoint_dmm[1]])
+                waypoints_deg.append([DMM_to_DEG(waypoint_dmm)[0], DMM_to_DEG(waypoint_dmm)[1]])
 
         # return the waypoints
         return np.array(waypoints_deg)
@@ -133,8 +134,14 @@ class Simulator:
             out = decode_response(ser_message)
 
         # extract lat and long
-        lat = float(out[0])
-        long = float(out[2])
+        try:
+            lat = float(out[0])
+            lon = float(out[2])
+        except:
+            lat = float(re.sub(r'[^\d\.]', '', out[0]))
+            lon = float(re.sub(r'[^\d\.]', '', out[2]))
+            print(lat, lon)
+
         speed = float(out[4])
         time = float(out[6])
         try:
@@ -146,7 +153,7 @@ class Simulator:
         # lon_dir = str(out[3])
         # update position of the boat
         self.prev_out = out
-        self._current_pos = np.array([lat, long])
+        self._current_pos = np.array([lat, lon])
         self._current_speed = speed
         self._current_time = time
         # print("current position: ", self._current_pos)
@@ -305,14 +312,10 @@ class Simulator:
         ### THIS PART IS JUST FOR PLOTTING ####
         # the list of waypoints in deg
         waypoints_list = Simulator.find_waypoints_deg(self)
-        
 
         # the limits for the plot
-        # temp = self.initial_pos
-        temp = (DMM_to_DEG(self.initial_pos)[0], self.initial_pos[1])
-        print(temp)
-        plot_limits = find_limits(initial_position=np.array(temp), waypoints=waypoints_list)
-        print(plot_limits)
+        plot_limits = find_limits(initial_position=np.array(DMM_to_DEG(self.initial_pos)), waypoints=waypoints_list)
+
         # Define a function to handle the keyboard interrupt event
         def on_key_press(event):
             if event.key == 'p':
@@ -334,13 +337,11 @@ class Simulator:
 
         aaa = 0
         while not self._mission:
-        
             aaa = aaa + 1
             start_time = time.time()
 
             # update position of the boat
             Simulator.__update_position(self)
-
 
             # update current track and waypoint
             # Simulator.__update_current_track(self)
@@ -356,11 +357,6 @@ class Simulator:
             # Convert format of waypoint from DMM to DEG
             current_waypoint_DEG = DMM_to_DEG(self._current_waypoint)
             current_pos_DEG = DMM_to_DEG(self._current_pos)
-
-            current_pos_DEG = (current_pos_DEG[0], self._current_pos[1])
-            # print(current_pos_DEG)
-
-
             # cross_track_error = LOS_latlon(self._current_pos, self._last_waypoint, self._current_waypoint)[1]
 
             # check whether the mission has finished (last waypoint has been reached)
@@ -440,6 +436,7 @@ class Simulator:
 
             with open('pollutant_log.pkl', 'wb') as f:
                 pickle.dump({'lat': current_pos_DEG[0], 'lon': current_pos_DEG[1], 'SIG': current_SIG}, f)
+
 
             # the path followed by the boat
             track = np.array([past_lat, past_lon])
