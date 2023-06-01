@@ -175,7 +175,8 @@ class Simulator:
 
             # check whether this is the last track
             if next_track_index == len(self.track_list):
-                print("This is the last track")
+                pass
+                # print("This is the last track")
 
             else:
                 # change current track to next track
@@ -204,7 +205,7 @@ class Simulator:
             distance_to_wp = call_distance(current_waypoint_DEG, current_pos_DEG)[0]  # distance in m
             # print("DISTANCE TO WAYPOINT: ", distance_to_wp)
 
-            if distance_to_wp < 15:
+            if distance_to_wp < 10:
                 # print("distance to current is smaller than 5/ change to next waypoint")
                 # change last waypoint to current waypoint
                 self._last_waypoint = self._current_waypoint
@@ -241,7 +242,7 @@ class Simulator:
             # print("1kt")
             # last waypoint becomes current waypoint
             if dt > 0:
-                controler = PID(Kp=15.0, Ki=0.0, Kd=5.0, setpoint=0.5, limits=(-100, 100))  # changed
+                controler = PID(Kp=15.0, Ki=0.0, Kd=5.0, setpoint=0.1, limits=(-100, 100))  # changed
                 PID_output = controler.call(self._current_speed, dt)
                 set_thrust(self._ser, PID_output)
                 #print(PID_output)
@@ -249,7 +250,7 @@ class Simulator:
         else:
             # print("5kts")
             if dt > 0:
-                controler = PID(Kp=15.0, Ki=0.0, Kd=5.0, setpoint=0.5, limits=(-100, 100))
+                controler = PID(Kp=15.0, Ki=0.0, Kd=5.0, setpoint=1.0, limits=(-100, 100))
                 PID_output = controler.call(self._current_speed, dt)
                 set_thrust(self._ser, PID_output)
                 #(PID_output)
@@ -408,15 +409,15 @@ class Simulator:
                 plt.xlabel("time(s)")
                 plt.ylabel("speed(kt)")
 
-                if distance < 15:
+                if distance < 5:
                     print("The last waypoint in the last track has been reached")
                     controler = PID(Kp=15.0, Ki=0.0, Kd=5.0, setpoint=0.0, limits=(0, 100))
                     PID_output = controler.call(self._current_speed, dt=0.2)
                     set_thrust(self._ser, PID_output)
                     self._ser.close()
                     self._mission = True
-                else:
-                    print('Distance to last waypoint:', distance)
+                # else:
+                #     print('Distance to last waypoint:', distance)
 
             # only for plotting
             past_lat.append(current_pos_DEG[0])
