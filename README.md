@@ -1,8 +1,7 @@
 # Marine Autonomy Challenge (MAChallenge)
 Code for the Marine Autonomy Challenge by the Society of Maritime Industries, focused on developing software for the autonomous operation of an uncrewed surface vehicle to map and detect hydrocarbon pollution & ocean plastics. 
 
-![Picture1](https://github.com/user-attachments/assets/bc3775cb-31dc-4298-8a36-1e99d81b5759)
-
+<img src="https://github.com/user-attachments/assets/bc3775cb-31dc-4298-8a36-1e99d81b5759" width="200" />
 
 ### Functionalities
 - path planning and following
